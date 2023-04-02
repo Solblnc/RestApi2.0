@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	ErrGetComment     = errors.New("Error in getting comment by id")
-	ErrUpdateComment  = errors.New("Error in updating a comment")
-	ErrDeleteComment  = errors.New("Error in deleting a comment")
-	ErrGetAllComments = errors.New("Error in getting all comments")
-	ErrCreateComment  = errors.New("Error in creating all comments")
+	ErrGetComment     = errors.New("error in getting comment by id")
+	ErrUpdateComment  = errors.New("error in updating a comment")
+	ErrDeleteComment  = errors.New("error in deleting a comment")
+	ErrGetAllComments = errors.New("error in getting all comments")
+	ErrCreateComment  = errors.New("error in creating all comments")
 )
 
 // Comment - description struct of comment
@@ -25,9 +25,9 @@ type Comment struct {
 // Store - defines all methods for our service
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
-	UpdateComment(context.Context, string) (Comment, error)
-	DeleteComment(ctx context.Context, id string) error
-	CreateComment(ctx context.Context, comment Comment) (Comment, error)
+	UpdateComment(context.Context, string, Comment) (Comment, error)
+	DeleteComment(context.Context, string) error
+	PostComment(context.Context, Comment) (Comment, error)
 }
 
 // Service - struct for logic
@@ -50,26 +50,23 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 	return comment, nil
 }
 
-func (s *Service) UpdateComment(ctx context.Context, id string) error {
-	fmt.Println("Updating a comment")
-	_, err := s.Store.UpdateComment(ctx, id)
+func (s *Service) UpdateComment(ctx context.Context, id string, cmt Comment) (Comment, error) {
+	cmt, err := s.Store.UpdateComment(ctx, id, cmt)
 	if err != nil {
-		fmt.Println(err)
-		return ErrUpdateComment
+		return Comment{}, fmt.Errorf("error in updating comment")
 	}
-	return nil
+	return cmt, nil
 }
 
-func (S *Service) DeleteComment(ctx context.Context, id string) error {
-	return ErrDeleteComment
+func (s *Service) DeleteComment(ctx context.Context, id string) error {
+	return s.Store.DeleteComment(ctx, id)
 }
 
-func (s *Service) CreateComment(ctx context.Context, comment Comment) (Comment, error) {
-	return Comment{}, ErrCreateComment
+func (s *Service) PostComment(ctx context.Context, comment Comment) (Comment, error) {
+	insertedCmt, err := s.Store.PostComment(ctx, comment)
+	if err != nil {
+		return Comment{}, err
+	}
+	return insertedCmt, nil
 }
-
-//func (s *Service) GetAllComments(ctx context.Context) (Comment,error) {
-//	return Comment{},ErrGetAllComments
-//}
-
 

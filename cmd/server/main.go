@@ -1,7 +1,9 @@
 package main
 
 import (
+	"RestApi2.0/internal/comment"
 	db "RestApi2.0/internal/db"
+	transport "RestApi2.0/internal/transport/http"
 	"context"
 	"fmt"
 )
@@ -25,7 +27,13 @@ func Run() error {
 		return err
 	}
 
-	fmt.Println("Successfully connects to database")
+	cmtService := comment.NewService(db)
+
+	httpHandler := transport.NewHandler(cmtService)
+	if err = httpHandler.Serve(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
